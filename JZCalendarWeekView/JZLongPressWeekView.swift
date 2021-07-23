@@ -32,7 +32,7 @@ public protocol JZLongPressViewDelegate: class {
     ///   - longPressType: the long press type when gusture cancels
     ///   - startDate: the startDate of the event when gesture cancels
     func weekView(_ weekView: JZLongPressWeekView, longPressType: JZLongPressWeekView.LongPressType, didCancelLongPressAt startDate: Date)
-    
+
     /// When long press is begining, this function will be called.
     /// Normally this function no need to be implemented.
     /// - Parameters:
@@ -109,6 +109,12 @@ open class JZLongPressWeekView: JZBaseWeekView {
     public var currentMovingCell: UICollectionViewCell!
     /// Get this value when long press began and save the current relative X and Y value until it ended or cancelled
     private var pressPosition: (xToViewLeft: CGFloat, yToViewTop: CGFloat)?
+
+    private var isPreparingToScrollLeft = false
+    private var isPreparingToScrollRight = false
+    private var performScrollLeft = true
+    private var performScrollRight = true
+    private var lastPointInSelfView: CGPoint!
 
     public weak var longPressDelegate: JZLongPressViewDelegate?
     public weak var longPressDataSource: JZLongPressViewDataSource?
@@ -187,26 +193,57 @@ open class JZLongPressWeekView: JZBaseWeekView {
     /// - The logic of vertical scroll is top scroll depending on **longPressView top** to longPressTopMarginY, bottom scroll denpending on **finger point** to LongPressBottomMarginY.
     /// - The logic of horizontal scroll is left scroll depending on **finger point** to longPressLeftMarginY, bottom scroll denpending on **finger point** to LongPressRightMarginY.
     private func updateScroll(pointInSelfView: CGPoint) {
+        self.lastPointInSelfView = pointInSelfView
         if isScrolling { return }
 
         // vertical
         if pointInSelfView.y - pressPosition!.yToViewTop < longPressTopMarginY + 10 {
             isScrolling = true
             scrollingTo(direction: .up)
+
             return
         } else if pointInSelfView.y > longPressBottomMarginY - 40 {
             isScrolling = true
             scrollingTo(direction: .down)
+
             return
         }
         // horizontal
         if pointInSelfView.x < longPressLeftMarginX + 10 {
-            isScrolling = true
-            scrollingTo(direction: .right)
+            if self.isPreparingToScrollRight == false {
+                self.isPreparingToScrollRight = true
+                self.performScrollRight = true
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    self.isScrolling = true
+
+                    if self.performScrollRight && self.lastPointInSelfView.x < self.longPressLeftMarginX + 10 {
+                        self.scrollingTo(direction: .right)
+                    }
+
+                    self.isScrolling = false
+                    self.isPreparingToScrollRight = false
+                }
+            }
+
             return
         } else if pointInSelfView.x > longPressRightMarginX - 20 {
-            isScrolling = true
-            scrollingTo(direction: .left)
+            if self.isPreparingToScrollLeft == false {
+                self.isPreparingToScrollLeft = true
+                self.performScrollLeft = true
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    self.isScrolling = true
+
+                    if self.performScrollLeft && self.lastPointInSelfView.x > self.longPressRightMarginX - 20 {
+                        self.scrollingTo(direction: .left)
+                    }
+
+                    self.isScrolling = false
+                    self.isPreparingToScrollLeft = false
+                }
+            }
+
             return
         }
     }
@@ -453,9 +490,9 @@ extension JZLongPressWeekView: UIGestureRecognizerDelegate {
 
             UIView.animate(withDuration: 0.2, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 5, options: .curveEaseOut,
                            animations: { self.longPressView.transform = CGAffineTransform.identity }, completion: nil)
-            
+
             let isAllowed = longPressDelegate?.weekView(self, editingEvent: currentLongPressType == .addNew ? nil : currentEditingInfo.event, didBeganLongPressAt: longPressViewStartDate)
-            
+
             if isAllowed == false{
                 gestureRecognizer.state = .cancelled
             }
@@ -476,6 +513,8 @@ extension JZLongPressWeekView: UIGestureRecognizerDelegate {
 
             self.currentMovingCell = nil
         } else if state == .ended {
+            self.performScrollRight = false
+            self.performScrollLeft = false
 
             self.longPressView.removeFromSuperview()
             if currentLongPressType == .addNew {
