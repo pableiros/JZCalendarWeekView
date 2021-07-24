@@ -145,7 +145,7 @@ open class JZBaseWeekView: UIView {
 
     /**
      Basic Setup method for JZCalendarWeekView,it **must** be called.
-     
+
      - Parameters:
         - numOfDays: Number of days in a page
         - setDate: The initial set date, the first date in current page except WeekView (numOfDays = 7)
@@ -300,8 +300,7 @@ open class JZBaseWeekView: UIView {
         let hour = CGFloat(components.hour!) + CGFloat(components.minute!) / 60
         let setTimeY = hour * flowLayout.hourHeight + flowLayout.contentsMargin.top
         let maxOffsetY = collectionView.contentSize.height - collectionView.frame.height + flowLayout.columnHeaderHeight + flowLayout.allDayHeaderHeight + flowLayout.contentsMargin.bottom + flowLayout.contentsMargin.top
-        collectionView.setContentOffsetWithoutDelegate(CGPoint(x: collectionView.contentOffset.x,
-                                                               y: max(0, min(setTimeY, maxOffsetY))), animated: false)
+        collectionView.setContentOffsetWithoutDelegate(CGPoint(x: collectionView.contentOffset.x, y: max(0, min(setTimeY, maxOffsetY - 75))), animated: false)
     }
 
     /// Get current event with item indexPath
@@ -333,7 +332,7 @@ open class JZBaseWeekView: UIView {
 
     /**
         Used to Refresh the weekView when viewWillTransition
-     
+
         **Must override viewWillTransition in the ViewController and call this function**
     */
     open func refreshWeekView() {
