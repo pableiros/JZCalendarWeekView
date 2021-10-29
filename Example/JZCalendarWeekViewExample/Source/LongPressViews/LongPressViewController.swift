@@ -67,6 +67,9 @@ extension LongPressViewController: JZBaseViewDelegate {
     func initDateDidChange(_ weekView: JZBaseWeekView, initDate: Date) {
         updateNaviBarTitle()
     }
+    
+    func calendarDidEndScrolling() {
+    }
 }
 
 // LongPress core

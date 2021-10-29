@@ -65,6 +65,9 @@ extension CustomViewController: JZBaseViewDelegate {
     func initDateDidChange(_ weekView: JZBaseWeekView, initDate: Date) {
         updateNaviBarTitle()
     }
+    
+    func calendarDidEndScrolling() {
+    }
 }
 
 // For example only
