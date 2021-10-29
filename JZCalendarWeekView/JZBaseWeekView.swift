@@ -15,17 +15,23 @@ public protocol JZBaseViewDelegate: class {
     ///   - weekView: current JZBaseWeekView
     ///   - initDate: the new value of initDate
     func initDateDidChange(_ weekView: JZBaseWeekView, initDate: Date)
+    
+    func calendarDidEndScrolling()
 }
 
 extension JZBaseViewDelegate {
     // Keep it optional
     func initDateDidChange(_ weekView: JZBaseWeekView, initDate: Date) {}
+    
+    func calendarDidEndScrolling() { }
 }
 
 open class JZBaseWeekView: UIView {
 
     public var collectionView: JZCollectionView!
     public var flowLayout: JZWeekViewFlowLayout!
+    
+    public var isCurrentlyScroll = false
 
     /**
      - The initial date of current collectionView. When page is not scrolling, the inital date is always
@@ -511,6 +517,10 @@ extension JZBaseWeekView: UICollectionViewDelegate, UICollectionViewDelegateFlow
         self.scrollDirection = self.getBeginDraggingScrollDirection()
         // deceleration rate should be normal in vertical scroll
         scrollView.decelerationRate = self.scrollDirection!.direction == .horizontal ? .fast : .normal
+        
+        if self.scrollDirection!.direction == .horizontal {
+            self.isCurrentlyScroll = true
+        }
     }
 
     open func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
@@ -527,6 +537,9 @@ extension JZBaseWeekView: UICollectionViewDelegate, UICollectionViewDelegateFlow
     // This function will be called when veritical scrolling ends
     open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         self.endOfScroll()
+        
+        self.isCurrentlyScroll = false
+        self.baseDelegate?.calendarDidEndScrolling()
     }
 
     /// Some actions need to be done when scroll ends
