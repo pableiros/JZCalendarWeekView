@@ -35,7 +35,14 @@ open class JZWeekViewFlowLayout: UICollectionViewFlowLayout {
     open var defaultColumnHeaderHeight: CGFloat { return 44 }
     open var defaultHourGridDivision: JZHourGridDivision { return .noneDiv }
     // You can change following constants
-    open var defaultGridThickness: CGFloat { return 0.5 }
+    open var defaultGridThickness: CGFloat {
+        #if targetEnvironment(macCatalyst)
+            return 1
+        #else
+            return 0.5
+        #endif
+    }
+
     open var defaultCurrentTimeLineHeight: CGFloat { return 10 }
     open var defaultAllDayOneLineHeight: CGFloat { return 30 }
     /// Margin for the flowLayout in collectionView
