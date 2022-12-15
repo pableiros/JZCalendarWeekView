@@ -9,11 +9,10 @@
 import UIKit
 
 /// The whole background for the top
-open class JZColumnHeaderBackground: UICollectionReusableView {
+open class JZColumnHeaderBackground: JZBaseCollectionReusableView {
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = UIColor.white
         self.clipsToBounds = true
         setupBottomDivider()
     }

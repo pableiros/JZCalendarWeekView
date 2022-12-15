@@ -9,12 +9,11 @@
 import UIKit
 
 /// Top Left corner in collectionView (Supplementary View)
-open class JZCornerHeader: UICollectionReusableView {
+open class JZCornerHeader: JZBaseCollectionReusableView {
 
     public override init(frame: CGRect) {
         super.init(frame: .zero)
 
-        self.backgroundColor = .white
         setupBottomDivider()
     }
 
